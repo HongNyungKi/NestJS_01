@@ -1,40 +1,55 @@
 import * as express from "express";
 import catsRouter from "./cats/cats.route";
 
-// express 어플리케이션 인스턴스 생성
-const app: express.Express = express();
+class Server {
+    public app: express.Application;
 
-// express에서 body값 가져오기 위함
-app.use(express.json());
+    constructor() {
+        const app: express.Application = express();
+        this.app = app;
+    }
 
-// 전체 라우터 적용 미들웨어
-app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
-    console.log(req.rawHeaders[1]);
-    next();
-});
+    private setRoute() {
+        this.app.use(catsRouter);
+    }
 
-// 특정 라우터 적용 미들웨어
-app.post('/cat', (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    console.log('post method router excute');
-    next();
-});
+    private setMiddleware() {
+        // 전체 라우터 적용 미들웨어
+        this.app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
+            console.log(req.rawHeaders[1]);
+            next();
+        });
 
-app.use(catsRouter);
+        // json 미들웨어(express에서 req.body값 가져오기)
+        this.app.use(express.json());
 
-// 홈
-app.get('/', (req: express.Request, res: express.Response) => {
-    res.send('hello world');
-});
+        // 특정 라우터 적용 미들웨어
+        this.app.post('/cat', (req: express.Request, res: express.Response, next: express.NextFunction) => {
+            console.log('post method router excute');
+            next();
+        });
 
-// 에러(찾을 수 없는 라우터)처리
-app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
-    console.log('404 Not Found Error');
-    next();
-});
+        this.setRoute();
 
-const port: number = 8000;
+        // 에러(찾을 수 없는 라우터)처리 미들웨어
+        this.app.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
+            console.log('404 Not Found Error');
+            next();
+        });
+    }
 
-// 어플리케이션 인스턴스 실행
-app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
-});
+    public listen() {
+        this.setMiddleware();
+
+        this.app.listen(8000, () => {
+            console.log('Server is running on http://localhost:8000');
+        });
+    }
+}
+
+function init() {
+    const server = new Server();
+    server.listen();
+}
+
+init();
