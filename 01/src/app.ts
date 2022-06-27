@@ -1,5 +1,5 @@
-import { Cat } from "./app.model";
 import * as express from "express";
+import catsRouter from "./cats/cats.route";
 
 // express 어플리케이션 인스턴스 생성
 const app: express.Express = express();
@@ -19,62 +19,7 @@ app.post('/cat', (req: express.Request, res: express.Response, next: express.Nex
     next();
 });
 
-// READ 전체 조회
-app.get('/cats', (req: express.Request, res: express.Response) => {
-    try {
-        const cats = Cat;
-
-        res.status(200).send({
-            success: true,
-            data: { cats },
-        });
-    } catch (error) {
-        res.status(400).send({
-            success: false,
-            error,
-        });
-    }
-});
-
-// READ 단일 조회
-app.get('/cat/:id', (req: express.Request, res: express.Response) => {
-    try {
-        const params = req.params
-
-        const cat = Cat.find((cat) => {
-            return cat.id === params.id;
-        });
-
-        res.status(200).send({
-            success: true,
-            data: { cat },
-        });
-    } catch (error) {
-        res.status(400).send({
-            success: false,
-            error,
-        });
-    }
-});
-
-// CREATE 정보 추가
-app.post('/cat', (req: express.Request, res: express.Response) => {
-    try {
-        const newCat = req.body;
-
-        Cat.push(newCat);
-
-        res.status(200).send({
-            success: true,
-            data: { newCat },
-        });
-    } catch (error) {
-        res.status(400).send({
-            success: false,
-            error,
-        });
-    }
-});
+app.use(catsRouter);
 
 // 홈
 app.get('/', (req: express.Request, res: express.Response) => {
